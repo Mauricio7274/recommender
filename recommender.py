@@ -4,7 +4,7 @@ class Recommender:
     La clase no debe requerir argumentos obligatorios para la inicialización.
     """
 
-    def train(self, filename="requirements.txt") -> None:
+    def train(self, filename="requirements.txt") -> 'Recommender':
         """
         Permite que el recomendador aprenda qué artículos existen y cuáles han sido comprados juntos en el pasado.
         :param filename: el nombre del archivo que contiene la base de datos.
@@ -12,10 +12,10 @@ class Recommender:
         """
         self.database = self.load_database(filename)
 
-        
+       
         self.tidsets = self.create_tidsets(self.database)
 
-        
+     
         self.itemsets, self.tidsets = self.eclat(self.database, 3)
         self.filtered_itemsets = self.filter_always_together(self.itemsets, self.tidsets, len(self.database))
 
@@ -67,97 +67,3 @@ class Recommender:
             k += 1
             itemsets = self.generate_candidates(set(current_itemsets), k)
         return valid_itemsets, tidsets
-
-    def filter_always_together(self, itemsets, tidsets, total_transactions):
-        return [itemset for itemset in itemsets if self.calculate_support(itemset, tidsets) != total_transactions]
-
-    def calculate_metrics(self, itemset, tidsets, total_transactions):
-        support_itemset = self.calculate_support(itemset, tidsets)
-        support = support_itemset / total_transactions
-
-        item_supports = {item: len(tidsets[item]) / total_transactions for item in itemset}
-
-        metrics = {
-            'support': support,
-            'confidence': {},
-            'lift': {},
-            'leverage': {},
-            'odds_ratio': {}
-        }
-
-        for item in itemset:
-            confidence = support / item_supports[item] if item_supports[item] != 0 else 0
-            metrics['confidence'][item] = confidence
-
-        for a in itemset:
-            for b in itemset:
-                if a != b:
-                    support_a = item_supports[a]
-                    support_b = item_supports[b]
-                    lift = support / (support_a * support_b) if (support_a * support_b) != 0 else 0
-                    leverage = support - (support_a * support_b)
-                    odds_ratio = (support * (1 - support_a) * (1 - support_b)) / ((support_a - support) * (support_b - support)) if (support_a - support) * (support_b - support) != 0 else 0
-
-                    metrics['lift'][(a, b)] = lift
-                    metrics['leverage'][(a, b)] = leverage
-                    metrics['odds_ratio'][(a, b)] = odds_ratio
-
-        return metrics
-
-    def get_top_recommendations(self, itemsets, tidsets, total_transactions):
-        recommendations = {}
-        for itemset in itemsets:
-            metrics = self.calculate_metrics(itemset, tidsets, total_transactions)
-            for item in itemset:
-                if item not in recommendations:
-                    recommendations[item] = []
-                for other_item in itemset:
-                    if item != other_item:
-                        score = metrics['lift'].get((item, other_item), 0)
-                        recommendations[item].append((other_item, score))
-
-        for item in recommendations:
-            
-            seen = set()
-            unique_recs = []
-            for other_item, score in recommendations[item]:
-                if other_item not in seen:
-                    unique_recs.append((other_item, score))
-                    seen.add(other_item)
-            recommendations[item] = sorted(unique_recs, key=lambda x: x[1], reverse=True)[:3]
-
-        return recommendations
-
-    def get_recommendations(self, cart: list, max_recommendations: int) -> list:
-        """
-        Hace una recomendación a un usuario específico.
-
-        :param cart: una lista con los artículos en el carrito.
-        :param max_recommendations: el número máximo de artículos que se pueden recomendar.
-        :return: una lista de al menos `max_recommendations` artículos a recomendar.
-        """
-        recommendations = self.get_top_recommendations(self.filtered_itemsets, self.tidsets, len(self.database))
-
-        recommended_items = set()
-        for item in cart:
-            if item in recommendations:
-                for rec_item, _ in recommendations[item]:
-                    if rec_item not in cart and rec_item not in recommended_items:
-                        recommended_items.add(rec_item)
-                        if len(recommended_items) >= max_recommendations:
-                            break
-            if len(recommended_items) >= max_recommendations:
-                break
-
-        return list(recommended_items)
-
-
-
-recommender = Recommender().train()
-
-recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
-
-for item, recs in recommendations.items():
-    print(f"Item: {item}")
-    for rec in recs:
-        print(f"  Recommend: {rec[0]}")
