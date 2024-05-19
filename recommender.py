@@ -1,6 +1,6 @@
 class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
-        # Asegúrate de que database_file sea un str y no una lista
+        
         if isinstance(database_file, list):
             database_file = database_file[0]
         self.database = self.load_database(database_file)
