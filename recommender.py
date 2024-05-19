@@ -2,8 +2,8 @@ import os
 
 class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
-        if not isinstance(database_file, (str, bytes, os.PathLike)):
-            raise TypeError("Expected str, bytes or os.PathLike object for database_file")
+        if isinstance(database_file, bytes):
+            database_file = database_file.decode()
         
         self.database = self.load_database(database_file)
         num_items = self.get_num_items(self.database)
@@ -14,9 +14,6 @@ class Recommender:
         return self
 
     def load_database(self, filename):
-        if not isinstance(filename, (str, bytes, os.PathLike)):
-            raise TypeError("Expected str, bytes or os.PathLike object for filename")
-        
         if isinstance(filename, bytes):
             filename = filename.decode()
         
@@ -105,9 +102,6 @@ class Recommender:
         return metrics
 
     def get_top_recommendations(self, database_file, total_transactions):
-        if not isinstance(database_file, (str, bytes, os.PathLike)):
-            raise TypeError("Expected str, bytes or os.PathLike object for database_file")
-        
         if isinstance(database_file, bytes):
             database_file = database_file.decode()
         
@@ -139,9 +133,6 @@ class Recommender:
         return recommendations
 
     def get_recommendations(self, cart: list, max_recommendations: int, database_file) -> list:
-        if not isinstance(database_file, (str, bytes, os.PathLike)):
-            raise TypeError("Expected str, bytes or os.PathLike object for database_file")
-        
         if isinstance(database_file, bytes):
             database_file = database_file.decode()
         
@@ -171,3 +162,4 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
+
