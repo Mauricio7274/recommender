@@ -1,7 +1,8 @@
 class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
-        self.prices = prices
         self.database = self.load_database(database_file)
+        num_items = self.get_num_items(self.database)
+        self.prices = list(range(num_items))
         self.tidsets = self.create_tidsets(self.database)
         self.itemsets, self.tidsets = self.eclat(self.database, 3)
         self.filtered_itemsets = self.filter_always_together(self.itemsets, self.tidsets, len(self.database))
@@ -14,6 +15,12 @@ class Recommender:
                 items = line.strip().split(',')
                 database.append(items)
         return database
+
+    def get_num_items(self, database):
+        items = set()
+        for transaction in database:
+            items.update(transaction)
+        return len(items)
 
     def create_tidsets(self, transactions):
         tidsets = {}
@@ -124,16 +131,8 @@ class Recommender:
 
         return list(recommended_items)
 
-# Define the path to the database file
 database_file = 'requirements.txt'
-
-# Placeholder for prices
-prices = [1] * 15
-
-# Train the recommender system
-recommender = Recommender().train(prices, database_file)
-
-# Get recommendations
+recommender = Recommender().train([], database_file)  # Empty list passed since prices will be generated internally
 recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
 
 for item, recs in recommendations.items():
