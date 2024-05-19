@@ -1,8 +1,12 @@
+import os
+
 class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
-        
         if isinstance(database_file, list):
             database_file = database_file[0]
+        if not isinstance(database_file, (str, bytes, os.PathLike)):
+            raise TypeError("Expected str, bytes or os.PathLike object for database_file")
+        
         self.database = self.load_database(database_file)
         num_items = self.get_num_items(self.database)
         self.prices = prices if prices else {item: 0 for item in range(num_items)}
@@ -12,6 +16,9 @@ class Recommender:
         return self
 
     def load_database(self, filename):
+        if not isinstance(filename, (str, bytes, os.PathLike)):
+            raise TypeError("Expected str, bytes or os.PathLike object for filename")
+        
         database = []
         with open(filename, 'r') as file:
             data = file.read().strip()
@@ -96,9 +103,17 @@ class Recommender:
 
         return metrics
 
-    def get_top_recommendations(self, itemsets, tidsets, total_transactions):
+    def get_top_recommendations(self, database_file, total_transactions):
+        if not isinstance(database_file, (str, bytes, os.PathLike)):
+            raise TypeError("Expected str, bytes or os.PathLike object for database_file")
+        
+        database = self.load_database(database_file)
+        tidsets = self.create_tidsets(database)
+        itemsets = self.eclat(database, 3)[0]
+        filtered_itemsets = self.filter_always_together(itemsets, tidsets, total_transactions)
+        
         recommendations = {}
-        for itemset in itemsets:
+        for itemset in filtered_itemsets:
             metrics = self.calculate_metrics(itemset, tidsets, total_transactions)
             for item in itemset:
                 if item not in recommendations:
@@ -119,8 +134,12 @@ class Recommender:
 
         return recommendations
 
-    def get_recommendations(self, cart: list, max_recommendations: int) -> list:
-        recommendations = self.get_top_recommendations(self.filtered_itemsets, self.tidsets, len(self.database))
+    def get_recommendations(self, cart: list, max_recommendations: int, database_file) -> list:
+        if not isinstance(database_file, (str, bytes, os.PathLike)):
+            raise TypeError("Expected str, bytes or os.PathLike object for database_file")
+        
+        total_transactions = len(self.load_database(database_file))
+        recommendations = self.get_top_recommendations(database_file, total_transactions)
 
         recommended_items = set()
         for item in cart:
@@ -135,10 +154,11 @@ class Recommender:
 
         return list(recommended_items)
 
+# Uso del Recommender
 database_file = 'requirements.txt'
 prices = {item: 0 for item in range(10)}
 recommender = Recommender().train(prices, database_file)
-recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
+recommendations = recommender.get_top_recommendations(database_file, len(recommender.database))
 
 for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
