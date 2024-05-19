@@ -1,32 +1,12 @@
 class Recommender:
-    """
-    Esta es la clase para hacer recomendaciones.
-    La clase no debe requerir argumentos obligatorios para la inicialización.
-    """
-
-    def train(self, filename="requirements.txt") -> 'Recommender':
-        """
-        Permite que el recomendador aprenda qué artículos existen y cuáles han sido comprados juntos en el pasado.
-        :param filename: el nombre del archivo que contiene la base de datos.
-        :return: el objeto debe retornarse a sí mismo aquí (esto es realmente importante).
-        """
-        self.database = self.load_database(filename)
-
-       
+    def train(self, database_file) -> 'Recommender':
+        self.database = self.read_database(database_file)
         self.tidsets = self.create_tidsets(self.database)
-
-        
         self.itemsets, self.tidsets = self.eclat(self.database, 3)
         self.filtered_itemsets = self.filter_always_together(self.itemsets, self.tidsets, len(self.database))
-
         return self
 
-    def load_database(self, filename):
-        """
-        Cargar la base de datos desde un archivo.
-        :param filename: el nombre del archivo que contiene la base de datos.
-        :return: una lista de listas de identificadores de artículos que se han comprado juntos.
-        """
+    def read_database(self, filename):
         database = []
         with open(filename, 'r') as file:
             for line in file:
@@ -117,7 +97,6 @@ class Recommender:
                         recommendations[item].append((other_item, score))
 
         for item in recommendations:
-          
             seen = set()
             unique_recs = []
             for other_item, score in recommendations[item]:
@@ -129,13 +108,6 @@ class Recommender:
         return recommendations
 
     def get_recommendations(self, cart: list, max_recommendations: int) -> list:
-        """
-        Hace una recomendación a un usuario específico.
-
-        :param cart: una lista con los artículos en el carrito.
-        :param max_recommendations: el número máximo de artículos que se pueden recomendar.
-        :return: una lista de al menos `max_recommendations` artículos a recomendar.
-        """
         recommendations = self.get_top_recommendations(self.filtered_itemsets, self.tidsets, len(self.database))
 
         recommended_items = set()
@@ -153,7 +125,9 @@ class Recommender:
 
 
 
-recommender = Recommender().train()
+database_file = 'requirements.txt'
+
+recommender = Recommender().train(database_file)
 
 recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
 
