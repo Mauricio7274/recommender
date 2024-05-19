@@ -19,6 +19,9 @@ class Recommender:
         if not isinstance(filename, (str, bytes, os.PathLike)):
             raise TypeError("Expected str, bytes or os.PathLike object for filename")
         
+        if isinstance(filename, bytes):
+            filename = filename.decode()
+        
         database = []
         with open(filename, 'r') as file:
             data = file.read().strip()
@@ -107,6 +110,9 @@ class Recommender:
         if not isinstance(database_file, (str, bytes, os.PathLike)):
             raise TypeError("Expected str, bytes or os.PathLike object for database_file")
         
+        if isinstance(database_file, bytes):
+            database_file = database_file.decode()
+        
         database = self.load_database(database_file)
         tidsets = self.create_tidsets(database)
         itemsets = self.eclat(database, 3)[0]
@@ -138,6 +144,9 @@ class Recommender:
         if not isinstance(database_file, (str, bytes, os.PathLike)):
             raise TypeError("Expected str, bytes or os.PathLike object for database_file")
         
+        if isinstance(database_file, bytes):
+            database_file = database_file.decode()
+        
         total_transactions = len(self.load_database(database_file))
         recommendations = self.get_top_recommendations(database_file, total_transactions)
 
@@ -164,3 +173,4 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
+
