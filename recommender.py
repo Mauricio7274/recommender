@@ -140,4 +140,3 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
-
