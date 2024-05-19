@@ -2,7 +2,7 @@ class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
         self.database = self.load_database(database_file)
         num_items = self.get_num_items(self.database)
-        self.prices = prices if prices else list(range(num_items))
+        self.prices = prices if prices else {item: 0 for item in range(num_items)}
         self.tidsets = self.create_tidsets(self.database)
         self.itemsets, self.tidsets = self.eclat(self.database, 3)
         self.filtered_itemsets = self.filter_always_together(self.itemsets, self.tidsets, len(self.database))
@@ -132,7 +132,7 @@ class Recommender:
         return list(recommended_items)
 
 database_file = 'requirements.txt'
-prices = list(range(10))  # Ejemplo de lista de precios, puede ser personalizada según necesidad
+prices = {item: 0 for item in range(10)}  # Ejemplo de precios como un diccionario
 recommender = Recommender().train(prices, database_file)
 recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
 
@@ -140,3 +140,4 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
+
