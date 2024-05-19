@@ -1,17 +1,18 @@
 class Recommender:
-    def train(self, database_file) -> 'Recommender':
-        self.database = self.read_database(database_file)
+    def train(self, prices, database) -> 'Recommender':
+        self.prices = prices
+        self.database = self.load_database(database)
         self.tidsets = self.create_tidsets(self.database)
         self.itemsets, self.tidsets = self.eclat(self.database, 3)
         self.filtered_itemsets = self.filter_always_together(self.itemsets, self.tidsets, len(self.database))
         return self
 
-    def read_database(self, filename):
+    def load_database(self, filename):
         database = []
         with open(filename, 'r') as file:
             for line in file:
-                transaction = line.strip().split(',')
-                database.append(transaction)
+                items = line.strip().split(',')
+                database.append(items)
         return database
 
     def create_tidsets(self, transactions):
@@ -126,7 +127,12 @@ class Recommender:
 
 database_file = 'requirements.txt'
 
-recommender = Recommender().train(database_file)
+
+prices = [1] * 15
+
+
+recommender = Recommender().train(prices, database_file)
+
 
 recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
 
@@ -134,3 +140,4 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
+
