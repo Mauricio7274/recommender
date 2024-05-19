@@ -2,6 +2,9 @@ import os
 
 class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
+        # Nos aseguramos de que database_file no sea una lista
+        if isinstance(database_file, list):
+            database_file = database_file[0]
         if isinstance(database_file, bytes):
             database_file = database_file.decode()
         
@@ -14,6 +17,8 @@ class Recommender:
         return self
 
     def load_database(self, filename):
+        if isinstance(filename, list):
+            filename = filename[0]
         if isinstance(filename, bytes):
             filename = filename.decode()
         
@@ -102,6 +107,8 @@ class Recommender:
         return metrics
 
     def get_top_recommendations(self, database_file, total_transactions):
+        if isinstance(database_file, list):
+            database_file = database_file[0]
         if isinstance(database_file, bytes):
             database_file = database_file.decode()
         
@@ -133,6 +140,8 @@ class Recommender:
         return recommendations
 
     def get_recommendations(self, cart: list, max_recommendations: int, database_file) -> list:
+        if isinstance(database_file, list):
+            database_file = database_file[0]
         if isinstance(database_file, bytes):
             database_file = database_file.decode()
         
