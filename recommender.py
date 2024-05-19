@@ -2,7 +2,7 @@ class Recommender:
     def train(self, database_file) -> 'Recommender':
         self.database = self.read_database(database_file)
         self.tidsets = self.create_tidsets(self.database)
-        self.itemsets, self.tidsets = self.eclat(self.database, 2)
+        self.itemsets, self.tidsets = self.eclat(self.database, 3)
         self.filtered_itemsets = self.filter_always_together(self.itemsets, self.tidsets, len(self.database))
         return self
 
@@ -124,7 +124,6 @@ class Recommender:
         return list(recommended_items)
 
 
-# Probar el sistema de recomendación
 database_file = 'requirements.txt'
 
 recommender = Recommender().train(database_file)
@@ -135,4 +134,3 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
-
