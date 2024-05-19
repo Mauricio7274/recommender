@@ -1,5 +1,5 @@
 class Recommender:
-    def train(self, database_file) -> 'Recommender':
+    def train(self, param1, param2, database_file) -> 'Recommender':
         self.database = self.read_database(database_file)
         self.tidsets = self.create_tidsets(self.database)
         self.itemsets, self.tidsets = self.eclat(self.database, 3)
@@ -125,9 +125,11 @@ class Recommender:
 
 
 
+param1 = None  
+param2 = None  
 database_file = 'requirements.txt'
 
-recommender = Recommender().train(database_file)
+recommender = Recommender().train(param1, param2, database_file)
 
 recommendations = recommender.get_top_recommendations(recommender.filtered_itemsets, recommender.tidsets, len(recommender.database))
 
@@ -135,4 +137,3 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
-
