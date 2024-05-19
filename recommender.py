@@ -2,8 +2,6 @@ import os
 
 class Recommender:
     def train(self, prices, database_file) -> 'Recommender':
-        if isinstance(database_file, list):
-            database_file = database_file[0]
         if not isinstance(database_file, (str, bytes, os.PathLike)):
             raise TypeError("Expected str, bytes or os.PathLike object for database_file")
         
@@ -173,4 +171,3 @@ for item, recs in recommendations.items():
     rec_items = ', '.join([rec[0] for rec in recs])
     print(f"Item: {item}")
     print(f"  Recommend: {rec_items}")
-
