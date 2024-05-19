@@ -13,8 +13,9 @@ class Recommender:
     def load_database(self, filename):
         database = []
         with open(filename, 'r') as file:
-            for line in file:
-                items = line.strip().split(',')
+            data = file.read().strip()
+            for line in data.split('\n'):
+                items = line.split(',')
                 database.append(items)
         return database
 
